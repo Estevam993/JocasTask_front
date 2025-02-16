@@ -1,11 +1,11 @@
 import { Center } from "@chakra-ui/react";
 import Form from "../Form/Form";
-import { usePostData } from "@/hooks";
+import { useLoginRequest } from "@/hooks";
 import { useToast } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 
 export default function Register() {
-  const { request } = usePostData();
+  const { request } = useLoginRequest();
   const toast = useToast();
   const router = useRouter();
 

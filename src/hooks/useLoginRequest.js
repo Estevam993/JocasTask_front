@@ -1,7 +1,7 @@
 import { postRequest } from "@/util/http";
 import { useMutation } from "@tanstack/react-query";
 
-const usePostData = () => {
+const useLoginRequest = () => {
   const mutation = useMutation({
     mutationFn: async ({ url, params }) => {
       const data = await postRequest({
@@ -19,4 +19,4 @@ const usePostData = () => {
   };
 };
 
-export default usePostData
+export default useLoginRequest

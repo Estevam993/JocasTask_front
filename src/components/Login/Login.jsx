@@ -1,13 +1,13 @@
-'use client'
+"use client";
 import { Center } from "@chakra-ui/react";
 import Form from "../Form/Form";
-import { usePostData } from "@/hooks";
+import { useLoginRequest } from "@/hooks";
 import { useToast } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { setCookie } from "@/util/http";
 
 export default function Login() {
-  const { request } = usePostData();
+  const { request } = useLoginRequest();
   const toast = useToast();
   const router = useRouter();
 
@@ -18,16 +18,21 @@ export default function Login() {
       const response = await request(`${apiUrl}auth/login`, params);
 
       toast({
-        description: 'Logado com sucesso.',
+        description: "Logado com sucesso.",
         status: "success",
         variant: "left-accent",
       });
 
-      setCookie('jwt', response.access_token)
+      await setCookie("jwt", response.access_token);
+      await setCookie("id", response.id);
 
-      router.push("/login");
+      router.push("/frames");
     } catch (err) {
-      console.log(err);
+      toast({
+        description: "Credenciais inválidas.",
+        status: "error",
+        variant: "left-accent",
+      });
     }
   };
 

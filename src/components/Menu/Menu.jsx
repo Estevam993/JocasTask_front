@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   Drawer,
@@ -16,17 +16,38 @@ import {
 } from "@chakra-ui/react";
 import ColorModeToggle from "@/util/ColorToggleMode";
 import { Divider } from "@chakra-ui/react";
-import { IconHomeFilled, IconMenu2 } from "@tabler/icons-react";
+import { IconHomeFilled, IconMenu2, IconLayoutKanbanFilled } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
+import { getCookie } from "@/util/http";
 
 export default function Menu() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef();
   const router = useRouter();
+  const [jwt, setJwt] = useState(null);
+
+  useEffect(() => {
+    const fetchCookie = async () => {
+      const cookieValue = await getCookie("jwt");
+      setJwt(cookieValue);
+    };
+
+    fetchCookie();
+  }, []);
+
+  const redirect = () => {
+    if (jwt) router.push("/frames");
+    else router.push("/");
+  }
+
+  const MenuIcon = ({}) => {
+    if (jwt) return <IconLayoutKanbanFilled />
+    return <IconHomeFilled />
+  }
 
   return (
     <>
-      <Button ref={btnRef} variant={'ghost'} onClick={onOpen}>
+      <Button ref={btnRef} variant={"ghost"} onClick={onOpen}>
         <IconMenu2 />
       </Button>
       <Drawer
@@ -41,8 +62,8 @@ export default function Menu() {
           <DrawerHeader>
             <Stack direction={"row"} spacing={2}>
               <ColorModeToggle />
-              <Button onClick={() => router.push("/")} variant={'ghost'}>
-                <IconHomeFilled />
+              <Button onClick={redirect} variant={"ghost"}>
+                <MenuIcon />
               </Button>
             </Stack>
           </DrawerHeader>
