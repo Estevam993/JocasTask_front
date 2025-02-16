@@ -8,9 +8,8 @@ export const postRequest = async (config) => {
 
   const newHeaders = { ...headers };
 
-  if (!newHeaders.Authorization) {
-    newHeaders.Authorization = `Bearer ${newHeaders.Authorization}`;
-  }
+  newHeaders.Authorization = `Bearer ${newHeaders.Authorization}`;
+
   try {
     const response = await axios.post(url, params, { headers: newHeaders });
 
@@ -50,14 +49,14 @@ export const setCookie = async (name, value, options = {}) => {
     secure: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "Strict",
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 24 * 60 * 60,
     path: "/",
     ...options,
   });
 };
 
 export const getCookie = async (name) => {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const cookie = cookieStore.get(name);
 
   return cookie?.value || null;

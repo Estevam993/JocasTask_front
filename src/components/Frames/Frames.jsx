@@ -1,22 +1,51 @@
 "use client";
 
-import { Box, Card, SimpleGrid, useToast } from "@chakra-ui/react";
-import CustomBox from "../ui/CustomBox";
-import { useFrames } from "@/hooks";
+// React
 import { useEffect, useState } from "react";
+
+// Chakra UI
+import {
+  Box,
+  Button,
+  Card,
+  Skeleton,
+  Stack,
+  Tooltip,
+  useDisclosure,
+  useToast,
+} from "@chakra-ui/react";
+
+// Tabler Icons
+import { IconPlus } from "@tabler/icons-react";
+
+// Hooks
+import { useFrames } from "@/hooks";
+
+// Components
+import CustomBox from "../ui/CustomBox";
 import FrameCard from "../ui/FrameCard";
+import FormModal from "../ui/FormModal";
 
 export default function Frames() {
-  const [getFramesByUserId] = useFrames();
+  // uses
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [getFramesByUserId, createFrame] = useFrames();
   const toast = useToast();
 
-  const { data, status, error } = getFramesByUserId();
+  // hooks
+  const { data, status } = getFramesByUserId();
+  const { create } = createFrame();
 
+  // states
   const [frames, setFrames] = useState([]);
   const [columns, setColumns] = useState([]);
 
-  const ShowFrames = ({ frames, columns }) => {
-    console.log("colunas: ", columns);
+  const ShowFrames = ({ frames, columns, status }) => {
+    if (status === "pending")
+      return [...Array(1)].map((_, index) => (
+        <Skeleton key={index} width={"250px"} height={"80px"} />
+      ));
+
     return frames?.map((frame) => {
       const frameColumns = columns.find((col) => col.frame_id === frame.id);
       return <FrameCard key={frame.id} frame={frame} columns={frameColumns} />;
@@ -36,18 +65,62 @@ export default function Frames() {
     }
   }, [status, data, toast]);
 
+  const CreateNewFrame = () => {
+    return (
+      <Tooltip label="Adicionar Quadro">
+        <Card p={4} width={"190px"} height={"20vh"} variant={"outline"}>
+          <Stack justifyContent={"center"} alignItems={"center"} h={"100%"}>
+            <Button variant={"ghost"} onClick={onOpen}>
+              <IconPlus />
+            </Button>
+          </Stack>
+        </Card>
+      </Tooltip>
+    );
+  };
+
+  const handleCreateFrame = async (formValues) => {
+    try {
+      const data = await create(formValues);
+      onClose();
+      toast({
+        description: data.message,
+        status: data.status,
+        variant: "left-accent",
+      });
+    } catch (error) {
+      toast({
+        description: "Ocorreu um erro ao criar o quadro.",
+        status: "error",
+        variant: "left-accent",
+      });
+    }
+  };
+
   return (
     <Box padding={10}>
       <CustomBox w="100%" h="calc(100vh - 140px)">
-        <SimpleGrid
-          columns={{ base: 1, sm: "auto-fit" }}
-          spacing="20px"
-          minChildWidth="250px"
-          w="100%"
-        >
-          <ShowFrames frames={frames} columns={columns} />
-        </SimpleGrid>
+        <Stack w={"100%"} spacing={6} direction={"row"} flexWrap={"wrap"}>
+          <ShowFrames frames={frames} columns={columns} status={status} />
+
+          <CreateNewFrame />
+        </Stack>
       </CustomBox>
+      <FormModal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={"Criar Quadro"}
+        fields={[{ field: "description", type: "text" }]}
+        buttons={[
+          {
+            label: "Criar",
+            color: "blue",
+            onClick: (formValues) => {
+              handleCreateFrame(formValues);
+            },
+          },
+        ]}
+      />
     </Box>
   );
 }
